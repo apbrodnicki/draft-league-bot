@@ -2,7 +2,6 @@ const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 const { addCommands } = require('./helper');
 
-// Create a new client instance
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -40,6 +39,4 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
-
-// Log in to Discord with your client's token
 client.login(token);
