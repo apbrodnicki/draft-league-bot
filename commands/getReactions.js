@@ -8,8 +8,8 @@ module.exports = {
 		const channel = interaction.channel;
 		const messages = await channel.messages.fetch({ limit: 20 });
 
-        messages.forEach(message => {
-            const oneReactions = message.reactions.cache.get('1️⃣');
+		messages.forEach(message => {
+			const oneReactions = message.reactions.cache.get('1️⃣');
 			const twoReactions = message.reactions.cache.get('2️⃣');
 
 			oneReactions?.users
@@ -19,7 +19,7 @@ module.exports = {
 				console.log(" Users who reacted with 1 to :" + message.content + ": " + Array.from(users).join(', '));
 				// interaction.channel.send(`${users} who reacted with 1`);
 			});
-			
+
 			twoReactions?.users
 			.fetch()
 			.then(allUsers => {
@@ -27,7 +27,8 @@ module.exports = {
 				console.log(" Users who reacted with 2 to : " + message.content + " : " + Array.from(users).join(', '));
 				// interaction.channel.send(`${users} who reacted with 2`);
 			});
-        });
+		});
+
 		await interaction.reply({ content: "Check console.log kek", ephemeral: true });
 	},
 };
