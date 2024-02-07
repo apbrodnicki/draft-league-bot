@@ -30,40 +30,8 @@ for (const file of commandFiles) {
 	}
 }
 
-client.on('ready', () => {
-	client.guilds.cache.forEach((guild) => {
-		// TODO: change to get specific channel IDs
-		guild.channels.cache.forEach((channel) => {
-			if (channel.id === '1203887231610134611') {
-				// Get all messages in that channel
-				channel.messages
-				.fetch()
-				.then(allMessages => {
-					allMessages.forEach(message => {
-						const oneReactions = message.reactions.cache.get('1️⃣');
-						const twoReactions = message.reactions.cache.get('2️⃣');
-
-						oneReactions?.users
-						.fetch()
-						.then(allUsers => {
-							const users = allUsers.map((user) => user.globalName);
-							console.log({users})
-						});
-
-						twoReactions?.users
-						.fetch()
-						.then(allUsers => {
-							const users = allUsers.map((user) => user.globalName);
-							console.log({users})
-						});
-					});
-				})
-				.catch((error) => {
-					console.log("ERROR:", error);
-				});
-			}
-		});
-	});
+client.once(Events.ClientReady, readyClient => {
+	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
