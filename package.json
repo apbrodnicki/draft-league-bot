@@ -1,14 +1,31 @@
 {
-  "name": "draft-league-bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "discord.js": "^14.14.1"
-  }
+	"name": "draft-league-bot",
+	"version": "1.0.0",
+	"description": "",
+	"main": "dist/index.js",
+	"scripts": {
+		"dev": "tsx watch src/index.ts",
+		"build": "tsc",
+		"deploy-commands": "tsx src/deploy-commands.ts",
+		"start": "node ."
+	},
+	"author": "Prateek Bansal and Alex Brodnicki",
+	"license": "ISC",
+	"dependencies": {
+		"discord.js": "^14.14.1",
+		"dotenv": "^16.4.1"
+	},
+	"devDependencies": {
+		"@stylistic/eslint-plugin": "^1.6.0",
+		"@types/node": "^20.11.16",
+		"@typescript-eslint/eslint-plugin": "^6.21.0",
+		"eslint": "^8.56.0",
+		"eslint-config-standard-with-typescript": "^43.0.1",
+		"eslint-plugin-import": "^2.29.1",
+		"eslint-plugin-n": "^16.6.2",
+		"eslint-plugin-promise": "^6.1.1",
+		"tsx": "^4.7.0",
+		"typescript": "^5.3.3"
+	},
+	"type": "module"
 }
