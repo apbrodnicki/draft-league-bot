@@ -1,6 +1,6 @@
 import { type CommandInteraction, SlashCommandBuilder } from 'discord.js';
 
-module.exports = {
+const getReactionsCommand = {
 	data: new SlashCommandBuilder()
 		.setName('getreactions')
 		.setDescription('Console logs who reacted with 1 or 2 in the last 50 messages'),
@@ -32,10 +32,11 @@ module.exports = {
 				})
 				.catch((error) => {
 					console.log(error);
-					console.log('test');
 				});
 		});
 
 		await interaction.reply({ content: 'Check console.log kek', ephemeral: true });
 	}
 };
+
+export default getReactionsCommand;
