@@ -3,7 +3,7 @@ import { type CommandInteraction, SlashCommandBuilder } from 'discord.js';
 const getReactionsCommand = {
 	data: new SlashCommandBuilder()
 		.setName('getreactions')
-		.setDescription('Console logs who reacted with 1 or 2 in the last 50 messages'),
+		.setDescription('Console logs who reacted with 1 or 2 in the last 20 messages'),
 	async execute(interaction: CommandInteraction) {
 		const channel = interaction.channel;
 		const messages = await channel?.messages.fetch({ limit: 20 });
