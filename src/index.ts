@@ -3,7 +3,6 @@ import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
 import { addCommands } from './helper';
 import { type Command } from './models';
 
-
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
