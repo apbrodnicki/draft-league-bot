@@ -12,6 +12,7 @@ const getReactionsCommand = {
 			const messages = await channel?.messages.fetch({ limit: 20 });
 
 			if (messages !== undefined) {
+				// Flip the order to go from oldest to newest
 				const sortedMessages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
 
 				for (const [, message] of sortedMessages) {
