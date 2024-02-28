@@ -3,11 +3,21 @@ import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 const getReactionsCommand = {
 	data: new SlashCommandBuilder()
 		.setName('getreactions')
-		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 20 messages'),
+		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 20 messages')
+		.addIntegerOption((option) => (
+			option
+				.setName('week')
+				.setRequired(true)
+				.setDescription('Enter in the week of pickems you would like to receive.')
+				.setMinValue(1)
+				.setMaxValue(12)
+		)),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.deferred && !interaction.replied) {
 			await interaction.deferReply({ ephemeral: true });
 
+			const weekToFetch = interaction.options.get('week')?.value;
+			console.log({ weekToFetch });
 			const channel = interaction.channel;
 			const messages = await channel?.messages.fetch({ limit: 20 });
 
