@@ -1,41 +1,39 @@
-import { type CommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 
 const getReactionsCommand = {
 	data: new SlashCommandBuilder()
 		.setName('getreactions')
-		.setDescription('Console logs who reacted with 1 or 2 in the last 20 messages'),
+		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 20 messages'),
 	async execute(interaction: CommandInteraction) {
-		const channel = interaction.channel;
-		const messages = await channel?.messages.fetch({ limit: 20 });
+		if (!interaction.deferred && !interaction.replied) {
+			await interaction.deferReply({ ephemeral: true });
 
-		messages?.forEach(message => {
-			const oneReactions = message.reactions.cache.get('1️⃣');
-			const twoReactions = message.reactions.cache.get('2️⃣');
+			const channel = interaction.channel;
+			const messages = await channel?.messages.fetch({ limit: 20 });
 
-			oneReactions?.users
-				.fetch()
-				.then(allUsers => {
-					const users = allUsers.map((user) => user.globalName);
-					console.log(' Users who reacted with 1 to :' + message.content + ': ' + Array.from(users).join(', '));
-					// interaction.channel.send(`${users} who reacted with 1`);
-				})
-				.catch((error) => {
-					console.log(error);
-				});
+			if (messages !== undefined) {
+				const sortedMessages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
 
-			twoReactions?.users
-				.fetch()
-				.then(allUsers => {
-					const users = allUsers.map((user) => user.globalName);
-					console.log(' Users who reacted with 2 to : ' + message.content + ' : ' + Array.from(users).join(', '));
-					// interaction.channel.send(`${users} who reacted with 2`);
-				})
-				.catch((error) => {
-					console.log(error);
-				});
-		});
+				for (const [, message] of sortedMessages) {
+					const oneReactions = message.reactions.cache.get('1️⃣');
+					const twoReactions = message.reactions.cache.get('2️⃣');
 
-		await interaction.reply({ content: 'Check console.log kek', ephemeral: true });
+					message.content = message.content.replace('1️⃣', '(1)').replace('2️⃣', '(2)');
+
+					const oneReactionUserCollections = await oneReactions?.users.fetch();
+					const usersReactingOne = oneReactionUserCollections?.map((user) => user.globalName);
+
+					const twoReactionUserCollections = await twoReactions?.users.fetch();
+					const usersReactingTwo = twoReactionUserCollections?.map((user) => user.globalName);
+
+					console.log(message.content);
+					console.log('1 reactions:', usersReactingOne);
+					console.log('2 reactions:', usersReactingTwo, '\n');
+				}
+			}
+
+			await interaction.editReply({ content: 'Check console.log kek' });
+		}
 	}
 };
 
