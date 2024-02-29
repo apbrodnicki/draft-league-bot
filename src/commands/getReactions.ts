@@ -9,7 +9,7 @@ const getReactionsCommand = {
 			await interaction.deferReply({ ephemeral: true });
 
 			const channel = interaction.channel;
-			const messages = await channel?.messages.fetch({ limit: 5 });
+			const messages = await channel?.messages.fetch({ limit: 50 });
 
 			if (messages !== undefined) {
 				// Flip the order to go from oldest to newest
