@@ -29,6 +29,14 @@ Make sure to run `npm run build` before deploying commands or starting up for pr
 ### getReactions
 
 Console logs the last 50 messages in a given channel and extracts the reactions.
+
+## Julian Clause
+
+1. Open Command Prompt (not as an administrator)
+2. Type `cd Pickems`, then hit enter
+3. Type `npm run dev`
+4. Run a slash command in Discord
+5. Grab output from Command Prompt
 ___
 
 *draft-league-bot was created by Prateek Bansal and Alex Brodnicki.*
