@@ -1,8 +1,8 @@
 import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 
-const getReactionsCommand = {
+const getPickemsCommand = {
 	data: new SlashCommandBuilder()
-		.setName('getreactions')
+		.setName('getPickems')
 		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 20 messages')
 		.addIntegerOption((option) => (
 			option
@@ -24,6 +24,9 @@ const getReactionsCommand = {
 			if (messages !== undefined) {
 				// Flip the order to go from oldest to newest
 				const sortedMessages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+				const startingMessage = sortedMessages.find((message) => message.content.includes(String(weekToFetch)));
+				const weekMessages = await channel?.messages.fetch({ after: startingMessage?.id, limit: 8 });
+				console.log({ weekMessages });
 
 				for (const [, message] of sortedMessages) {
 					const oneReactions = message.reactions.cache.get('1️⃣');
@@ -48,4 +51,4 @@ const getReactionsCommand = {
 	}
 };
 
-export default getReactionsCommand;
+export default getPickemsCommand;
