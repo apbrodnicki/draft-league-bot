@@ -3,7 +3,7 @@ import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 const getReactionsCommand = {
 	data: new SlashCommandBuilder()
 		.setName('getreactions')
-		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 20 messages'),
+		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 50 messages'),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.deferred && !interaction.replied) {
 			await interaction.deferReply({ ephemeral: true });
@@ -34,8 +34,22 @@ const getReactionsCommand = {
 					const alphabetizedTwoUsers = twoUsersStringArray.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
 					console.log(message.content);
-					console.log('1 reactions:', alphabetizedOneUsers);
-					console.log('2 reactions:', alphabetizedTwoUsers, '\n');
+
+					console.log('\t' + '1 reactions:');
+					if (alphabetizedOneUsers.length > 0) {
+						alphabetizedOneUsers.forEach((user) => { console.log('\t\t' + user); });
+					} else {
+						console.log('\t\t' + 'No reactions.');
+					}
+
+					console.log('\t' + '2 reactions:');
+					if (alphabetizedTwoUsers.length > 0) {
+						alphabetizedTwoUsers.forEach((user) => { console.log('\t\t' + user); });
+					} else {
+						console.log('\t\t' + 'No reactions.');
+					}
+
+					console.log('\n');
 				}
 			}
 
