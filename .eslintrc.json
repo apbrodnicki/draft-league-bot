@@ -34,6 +34,14 @@
 		"@stylistic/indent": [
 			"error",
 			"tab"
+		],
+		"@stylistic/object-curly-spacing": [
+			"error",
+			"always"
+		],
+		"semi-style": [
+			"error",
+			"last"
 		]
 	}
 }

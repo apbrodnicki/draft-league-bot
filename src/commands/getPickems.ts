@@ -3,7 +3,7 @@ import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 const getPickemsCommand = {
 	data: new SlashCommandBuilder()
 		.setName('getPickems')
-		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 20 messages')
+		.setDescription('Log in the console those who reacted with a 1 or 2 in the last 50 messages')
 		.addIntegerOption((option) => (
 			option
 				.setName('week')
@@ -19,7 +19,7 @@ const getPickemsCommand = {
 			const weekToFetch = interaction.options.get('week')?.value;
 			console.log({ weekToFetch });
 			const channel = interaction.channel;
-			const messages = await channel?.messages.fetch({ limit: 20 });
+			const messages = await channel?.messages.fetch({ limit: 50 });
 
 			if (messages !== undefined) {
 				// Flip the order to go from oldest to newest
@@ -34,15 +34,35 @@ const getPickemsCommand = {
 
 					message.content = message.content.replace('1️⃣', '(1)').replace('2️⃣', '(2)');
 
-					const oneReactionUserCollections = await oneReactions?.users.fetch();
-					const usersReactingOne = oneReactionUserCollections?.map((user) => user.globalName);
+					// Get the users per reaction, grab the name, convert the typing
+					const oneUsersCollection = await oneReactions?.users.fetch();
+					const oneUsersNames = oneUsersCollection?.map((user) => user.globalName);
+					const oneUsersStringArray = (oneUsersNames ?? []) as string[];
 
-					const twoReactionUserCollections = await twoReactions?.users.fetch();
-					const usersReactingTwo = twoReactionUserCollections?.map((user) => user.globalName);
+					const twoUsersCollection = await twoReactions?.users.fetch();
+					const twoUsersNames = twoUsersCollection?.map((user) => user.globalName);
+					const twoUsersStringArray = (twoUsersNames ?? []) as string[];
+
+					const alphabetizedOneUsers = oneUsersStringArray.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+					const alphabetizedTwoUsers = twoUsersStringArray.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
 					console.log(message.content);
-					console.log('1 reactions:', usersReactingOne);
-					console.log('2 reactions:', usersReactingTwo, '\n');
+
+					console.log('\t' + '1 reactions:');
+					if (alphabetizedOneUsers.length > 0) {
+						alphabetizedOneUsers.forEach((user) => { console.log('\t\t' + user); });
+					} else {
+						console.log('\t\t' + 'No reactions.');
+					}
+
+					console.log('\t' + '2 reactions:');
+					if (alphabetizedTwoUsers.length > 0) {
+						alphabetizedTwoUsers.forEach((user) => { console.log('\t\t' + user); });
+					} else {
+						console.log('\t\t' + 'No reactions.');
+					}
+
+					console.log('\n');
 				}
 			}
 
