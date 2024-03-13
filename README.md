@@ -26,9 +26,9 @@ Make sure to run `npm run build` before deploying commands or starting up for pr
 
 ## Slash Commands
 
-### getReactions
+### getpickems
 
-Console logs the last 50 messages in a given channel and extracts the reactions.
+Console logs the messages and reactions of a given week of messages.
 
 ## Julian Clause
 
