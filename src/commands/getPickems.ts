@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
-import type { Message } from '../models'; // fix the ../
+import type { Message } from 'src/models';
 
 const getPickemsCommand = {
 	data: new SlashCommandBuilder()

@@ -1,5 +1,5 @@
+import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 import 'dotenv/config';
-import { Client, Events, GatewayIntentBits, Collection } from 'discord.js';
 import { addCommands } from './helper.js';
 import { type Command } from './models';
 

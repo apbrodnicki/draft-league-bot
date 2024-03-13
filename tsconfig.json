@@ -2,24 +2,26 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"allowSyntheticDefaultImports": true,
+		"baseUrl": "./",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
 		"lib": [
 			"dom",
 			"dom.iterable",
-			"ES2022"
+			"esnext"
 		],
-		"module": "ES2022",
+		"module": "ESNEXT",
 		"moduleResolution": "node",
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitAny": true,
 		"outDir": "dist",
+		"removeComments": false,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"sourceMap": false,
 		"strict": true,
-		"target": "ES2022"
+		"target": "esnext"
 	},
 	"include": [
 		"src",

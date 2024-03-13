@@ -1,5 +1,5 @@
-import 'dotenv/config';
 import { REST, Routes, type SlashCommandBuilder } from 'discord.js';
+import 'dotenv/config';
 import { addCommands } from './helper';
 
 const rest = new REST().setToken(process.env.TOKEN ?? '');
@@ -15,7 +15,7 @@ void (async () => {
 			{ body: commands }
 		);
 
-		console.log('Successfully reloaded application (/) commands.');
+		console.log(`Successfully reloaded ${commands.length} application (/) commands.`);
 	} catch (error) {
 		console.error(error);
 	}
