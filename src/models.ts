@@ -8,6 +8,7 @@ export interface Command {
 	data: SlashCommandBuilder,
 	execute: (interaction: CommandInteraction) => Promise<void>,
 };
+
 export interface Message {
 	content: string,
 	reactions: ReactionManager,
