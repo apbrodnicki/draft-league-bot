@@ -5,14 +5,25 @@ const getPickemsCommand = {
 	data: new SlashCommandBuilder()
 		.setName('getpickems')
 		.setDescription('Log in the console those who reacted with a 1 or 2 for the specified week.')
-		.addIntegerOption((option) => (
+		.addStringOption((option) =>
 			option
 				.setName('week')
-				.setRequired(true)
 				.setDescription('Enter in the week of pickems you would like to start with.')
-				.setMinValue(1)
-				.setMaxValue(11) // 8 regular season weeks, 3 playoff weeks
-		))
+				.setRequired(true)
+				.addChoices(
+					{ name: 'Week 1', value: 'week1' },
+					{ name: 'Week 2', value: 'week2' },
+					{ name: 'Week 3', value: 'week3' },
+					{ name: 'Week 4', value: 'week4' },
+					{ name: 'Week 5', value: 'week5' },
+					{ name: 'Week 6', value: 'week6' },
+					{ name: 'Week 7', value: 'week7' },
+					{ name: 'Week 8', value: 'week8' },
+					{ name: 'Quarterfinals', value: 'quarterfinals' },
+					{ name: 'Semifinals', value: 'semifinals' },
+					{ name: 'Grand Finals', value: 'grandfinals' },
+				)
+		)
 		.addIntegerOption((option) => (
 			option
 				.setName('amount')
@@ -25,7 +36,7 @@ const getPickemsCommand = {
 			await interaction.deferReply({ ephemeral: true });
 
 			const channel = interaction.channel;
-			const weekToFetch = interaction.options.get('week')?.value as number;
+			const weekToFetch = interaction.options.get('week')?.value as string;
 			const amountToFetch = interaction.options.get('amount')?.value as number | undefined;
 			const channelMessages = await channel?.messages.fetch({ limit: 100 });
 
@@ -40,7 +51,7 @@ const getPickemsCommand = {
 				createdTimestamp: message.createdTimestamp
 			}));
 
-			const startingMessage = messages.find((message) => message.content.includes('Week ' + String(weekToFetch)));
+			const startingMessage = messages.find((message) => message.content.replace(' ', '').toLowerCase().includes(weekToFetch));
 
 			if (startingMessage === undefined) {
 				return await interaction.editReply({ content: 'The week you have requested is not available.' });
@@ -56,14 +67,14 @@ const getPickemsCommand = {
 			if (amountToFetch === undefined) {
 				let amountOfMessages: number = 0;
 
-				if (weekToFetch <= 8) {
-					amountOfMessages = 8;
-				} else if (weekToFetch === 9) {
+				if (weekToFetch === 'quarterfinals') {
 					amountOfMessages = 4;
-				} else if (weekToFetch === 10) {
+				} else if (weekToFetch === 'semifinals') {
 					amountOfMessages = 2;
-				} else if (weekToFetch === 11) {
+				} else if (weekToFetch === 'grandfinals') {
 					amountOfMessages = 1;
+				} else {
+					amountOfMessages = 8;
 				}
 
 				outputMessages = sortedMessages.slice(startingIndex, startingIndex + amountOfMessages);
