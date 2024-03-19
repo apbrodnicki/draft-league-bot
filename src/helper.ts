@@ -1,8 +1,8 @@
-import { type SlashCommandBuilder, type Collection } from 'discord.js';
+import { type Collection, type SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
 import path, { dirname } from 'path';
-import { type CommandModule } from './models';
 import { fileURLToPath } from 'url';
+import { type CommandModule } from './models';
 
 export const addCommands = async (commands?: Collection<any, any>): Promise<Collection<string, any> | SlashCommandBuilder[]> => {
 	const fileName = fileURLToPath(import.meta.url);
