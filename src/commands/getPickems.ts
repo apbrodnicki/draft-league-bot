@@ -35,6 +35,7 @@ const getPickemsCommand = {
 		if (!interaction.deferred && !interaction.replied) {
 			await interaction.deferReply({ ephemeral: true });
 
+			let discordReply: string = '';
 			const channel = interaction.channel;
 			const weekToFetch = interaction.options.get('week')?.value as string;
 			const amountToFetch = interaction.options.get('amount')?.value as number | undefined;
@@ -100,26 +101,25 @@ const getPickemsCommand = {
 				const alphabetizedOneUsers = oneUsersStringArray.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 				const alphabetizedTwoUsers = twoUsersStringArray.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-				console.log(message.content);
-
-				console.log('\t' + '1 reactions:');
+				// Build the Discord reply
+				discordReply += `${message.content}\n\t1 reactions:\n`;
 				if (alphabetizedOneUsers.length > 0) {
-					alphabetizedOneUsers.forEach((user) => { console.log('\t\t' + user); });
+					alphabetizedOneUsers.forEach((user) => { discordReply += `\t\t${user}\n`; });
 				} else {
-					console.log('\t\t' + 'No reactions.');
+					discordReply += '\t\tNo reactions.\n';
 				}
 
-				console.log('\t' + '2 reactions:');
+				discordReply += '\t2 reactions:\n';
 				if (alphabetizedTwoUsers.length > 0) {
-					alphabetizedTwoUsers.forEach((user) => { console.log('\t\t' + user); });
+					alphabetizedTwoUsers.forEach((user) => { discordReply += `\t\t${user}\n`; });
 				} else {
-					console.log('\t\t' + 'No reactions.');
+					discordReply += '\t\tNo reactions.\n';
 				}
 
-				console.log('\n');
+				discordReply += '\n';
 			}
 
-			return await interaction.editReply({ content: 'Check console.log kek' });
+			return await interaction.editReply({ content: discordReply });
 		}
 	}
 };
