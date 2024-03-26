@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 import 'dotenv/config';
-import { google } from 'googleapis';
+import { google, type sheets_v4 } from 'googleapis';
 
 const updatePlayerNames = {
 	data: new SlashCommandBuilder()
@@ -41,7 +41,8 @@ const updatePlayerNames = {
 
 			const googleServiceAccount = process.env.GOOGLE_SERVICE_ACCOUNT;
 
-			if (spreadsheetId === undefined || googleServiceAccount === undefined) {
+			spreadsheetId = '1uGlEtLBpvZ1bySF4sTDfJOfUeZeeg3itjvMqPps2uDg';
+			if (spreadsheetId === undefined || spreadsheetId.length === 0 || googleServiceAccount === undefined) {
 				return await interaction.editReply({ content: 'Authentication has failed.' });
 			}
 
@@ -53,39 +54,37 @@ const updatePlayerNames = {
 				]
 			});
 
-			const googleSheets = google.sheets({
+			const googleSheetsService = google.sheets({
 				version: 'v4',
 				auth
 			});
 
-			const sheets = await googleSheets.spreadsheets.get({
+			const spreadsheet = await googleSheetsService.spreadsheets.get({
 				spreadsheetId,
 				fields: 'sheets.properties'
 			});
 
-			if (sheets.data.sheets === undefined) {
+			const sheets = spreadsheet.data.sheets;
+
+			if (sheets === undefined) {
 				return await interaction.editReply({ content: 'There is no available data for the spreadsheet.' });
 			}
 
-			for (const [index, name] of playerNames.entries()) {
-				// Grab each player sheet, starting with P1
-				const sheet = sheets.data.sheets.find((element) => element.properties?.title === `P${index + 1}`);
+			const rostersSheet = await googleSheetsService.spreadsheets.values.get({
+				spreadsheetId,
+				range: 'Rosters'
+			});
 
+			const rostersSheetValues: string[][] | null | undefined = rostersSheet.data.values;
+
+			if (!Array.isArray(rostersSheetValues)) {
+				return await interaction.editReply({ content: 'There is no available data for the to update the roster.' });
+			}
+
+			for (const [index, name] of playerNames.entries()) {
 				try {
-					void googleSheets.spreadsheets.batchUpdate({
-						spreadsheetId,
-						requestBody: {
-							requests: [{
-								updateSheetProperties: {
-									fields: 'title',
-									properties: {
-										title: name,
-										sheetId: sheet?.properties?.sheetId
-									}
-								}
-							}]
-						}
-					});
+					updateSheetNames(sheets, googleSheetsService, spreadsheetId, index, name);
+					updateCoachNames(googleSheetsService, spreadsheetId, rostersSheetValues, index, name);
 				} catch (error) {
 					let errorMessage: string;
 					error instanceof Error ? errorMessage = `An error has occurred: ${error.message}` : errorMessage = 'Unknown error.';
@@ -97,6 +96,67 @@ const updatePlayerNames = {
 			return await interaction.editReply({ content: 'Player names successfully updated.' });
 		}
 	}
+};
+
+const updateSheetNames = (
+	sheets: sheets_v4.Schema$Sheet[],
+	googleSheetsService: sheets_v4.Sheets,
+	spreadsheetId: string,
+	index: number,
+	name: string
+): void => {
+	// Grab each player sheet, starting with P1
+	const sheet = sheets.find((element) => element.properties?.title === `P${index + 1}`);
+
+	void googleSheetsService.spreadsheets.batchUpdate({
+		spreadsheetId,
+		requestBody: {
+			requests: [{
+				updateSheetProperties: {
+					fields: 'title',
+					properties: {
+						title: name,
+						sheetId: sheet?.properties?.sheetId
+					}
+				}
+			}]
+		}
+	});
+};
+
+const updateCoachNames = (
+	googleSheetsService: sheets_v4.Sheets,
+	spreadsheetId: string,
+	rostersSheetValues: string[][],
+	outerIndex: number,
+	name: string
+): void => {
+	for (let index = 0; index < rostersSheetValues.length; index++) {
+		// Find the position of each cell, starting with P1
+		const row = rostersSheetValues[index];
+		const columnIndex = row.indexOf(`P${outerIndex + 1}`);
+
+		if (columnIndex !== -1) {
+			void googleSheetsService.spreadsheets.values.update({
+				spreadsheetId,
+				range: `Rosters!${getColumnLetter(columnIndex)}${index + 1}`,
+				valueInputOption: 'RAW',
+				requestBody: {
+					values: [[name]]
+				}
+			});
+		}
+	}
+};
+
+const getColumnLetter = (columnIndex: number): string => {
+	let columnLetter = '';
+	while (columnIndex >= 0) {
+		columnLetter = String.fromCharCode(65 + (columnIndex % 26)) + columnLetter;
+		columnIndex = Math.floor(columnIndex / 26) - 1;
+	}
+
+	return columnLetter;
 };
 
 export default updatePlayerNames;
