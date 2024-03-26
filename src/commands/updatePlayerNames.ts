@@ -84,7 +84,6 @@ const updatePlayerNames = {
 				try {
 					updateSheetName(sheets, googleSheetsService, spreadsheetId, index, name);
 					updateCoachName(googleSheetsService, spreadsheetId, rostersSheetValues, index, name);
-					updateShowdownName(googleSheetsService, spreadsheetId, index, name);
 				} catch (error) {
 					let errorMessage: string;
 					error instanceof Error ? errorMessage = `An error has occurred: ${error.message}` : errorMessage = 'Unknown error.';
@@ -157,22 +156,6 @@ const getColumnLetter = (columnIndex: number): string => {
 	}
 
 	return columnLetter;
-};
-
-const updateShowdownName = (
-	googleSheetsService: sheets_v4.Sheets,
-	spreadsheetId: string,
-	outerIndex: number,
-	name: string
-): void => {
-	void googleSheetsService.spreadsheets.values.update({
-		spreadsheetId,
-		range: `Standings Code!J${42 + outerIndex}`,
-		valueInputOption: 'RAW',
-		requestBody: {
-			values: [[name]]
-		}
-	});
 };
 
 export default updatePlayerNames;
