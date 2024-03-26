@@ -42,6 +42,9 @@
 		"semi-style": [
 			"error",
 			"last"
+		],
+		"@typescript-eslint/non-nullable-type-assertion-style": [
+			"off"
 		]
 	}
 }
