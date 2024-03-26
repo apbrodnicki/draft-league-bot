@@ -41,7 +41,6 @@ const updatePlayerNames = {
 
 			const googleServiceAccount = process.env.GOOGLE_SERVICE_ACCOUNT;
 
-			spreadsheetId = '1uGlEtLBpvZ1bySF4sTDfJOfUeZeeg3itjvMqPps2uDg';
 			if (spreadsheetId === undefined || spreadsheetId.length === 0 || googleServiceAccount === undefined) {
 				return await interaction.editReply({ content: 'Authentication has failed.' });
 			}
@@ -83,8 +82,9 @@ const updatePlayerNames = {
 
 			for (const [index, name] of playerNames.entries()) {
 				try {
-					updateSheetNames(sheets, googleSheetsService, spreadsheetId, index, name);
-					updateCoachNames(googleSheetsService, spreadsheetId, rostersSheetValues, index, name);
+					updateSheetName(sheets, googleSheetsService, spreadsheetId, index, name);
+					updateCoachName(googleSheetsService, spreadsheetId, rostersSheetValues, index, name);
+					updateShowdownName(googleSheetsService, spreadsheetId, index, name);
 				} catch (error) {
 					let errorMessage: string;
 					error instanceof Error ? errorMessage = `An error has occurred: ${error.message}` : errorMessage = 'Unknown error.';
@@ -98,15 +98,15 @@ const updatePlayerNames = {
 	}
 };
 
-const updateSheetNames = (
+const updateSheetName = (
 	sheets: sheets_v4.Schema$Sheet[],
 	googleSheetsService: sheets_v4.Sheets,
 	spreadsheetId: string,
-	index: number,
+	outerIndex: number,
 	name: string
 ): void => {
 	// Grab each player sheet, starting with P1
-	const sheet = sheets.find((element) => element.properties?.title === `P${index + 1}`);
+	const sheet = sheets.find((element) => element.properties?.title === `P${outerIndex + 1}`);
 
 	void googleSheetsService.spreadsheets.batchUpdate({
 		spreadsheetId,
@@ -124,7 +124,7 @@ const updateSheetNames = (
 	});
 };
 
-const updateCoachNames = (
+const updateCoachName = (
 	googleSheetsService: sheets_v4.Sheets,
 	spreadsheetId: string,
 	rostersSheetValues: string[][],
@@ -157,6 +157,22 @@ const getColumnLetter = (columnIndex: number): string => {
 	}
 
 	return columnLetter;
+};
+
+const updateShowdownName = (
+	googleSheetsService: sheets_v4.Sheets,
+	spreadsheetId: string,
+	outerIndex: number,
+	name: string
+): void => {
+	void googleSheetsService.spreadsheets.values.update({
+		spreadsheetId,
+		range: `Standings Code!J${42 + outerIndex}`,
+		valueInputOption: 'RAW',
+		requestBody: {
+			values: [[name]]
+		}
+	});
 };
 
 export default updatePlayerNames;
