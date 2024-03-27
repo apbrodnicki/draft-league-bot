@@ -3,7 +3,7 @@ import type { Message } from 'src/models';
 
 const getPickemsCommand = {
 	data: new SlashCommandBuilder()
-		.setName('getpickems')
+		.setName('get-pickems')
 		.setDescription('Log in the console those who reacted with a 1 or 2 for the specified week.')
 		.addStringOption((option) =>
 			option

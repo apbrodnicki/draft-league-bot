@@ -1,5 +1,6 @@
 import { type Collection, type SlashCommandBuilder } from 'discord.js';
 import fs from 'fs';
+import { google, type sheets_v4 } from 'googleapis';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { type CommandModule } from './models';
@@ -28,4 +29,27 @@ export const addCommands = async (commands?: Collection<any, any>): Promise<Coll
 	}
 
 	return commands ?? commandsArray;
+};
+
+export const getGoogleSheetsService = (): sheets_v4.Sheets => {
+	const googleServiceAccount = process.env.GOOGLE_SERVICE_ACCOUNT;
+
+	if (googleServiceAccount === undefined || googleServiceAccount.length === 0) {
+		throw new Error('Google Service Account authentication has failed.');
+	}
+
+	const auth = new google.auth.GoogleAuth({
+		credentials: JSON.parse(googleServiceAccount),
+		scopes: [
+			'https://www.googleapis.com/auth/drive',
+			'https://www.googleapis.com/auth/spreadsheets',
+		]
+	});
+
+	const googleSheetsService = google.sheets({
+		version: 'v4',
+		auth
+	});
+
+	return googleSheetsService;
 };
