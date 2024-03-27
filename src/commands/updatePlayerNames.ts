@@ -87,7 +87,7 @@ const updateSheetName = (
 	sheets: sheets_v4.Schema$Sheet[]
 ): void => {
 	// Grab each player sheet, starting with P1
-	const sheet = sheets.find((element) => element.properties?.title === `P${outerIndex + 1}`);
+	const sheet = sheets.find((currentSheet) => currentSheet.properties?.title === `P${outerIndex + 1}`);
 
 	void googleSheetsService.spreadsheets.batchUpdate({
 		spreadsheetId,
