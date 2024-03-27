@@ -18,17 +18,21 @@ Run `npm install`.
 
 `npm run build` used to compile the code
 
-`npm run deploy-commands` used to deploy new commands
+`npm run deploy-commands` used to deploy new commands*
 
-`npm run start` used for production
+`npm run start` used for production*
 
-Make sure to run `npm run build` before deploying commands or starting up for production.
+*These commands will run `npm run build` first automatically.
 
 ## Slash Commands
 
-### getpickems
+### get-pickems
 
-Console logs the messages and reactions of a given week of messages.
+Returns the messages and reactions in a channel based on the user's specifications.
+
+### update-player-names
+
+Updates the sheet titles and coach names in a Google spreadsheet.
 
 ## Julian Clause
 
@@ -36,7 +40,6 @@ Console logs the messages and reactions of a given week of messages.
 2. Type `cd Pickems`, then hit enter
 3. Type `npm run dev`
 4. Run a slash command in Discord
-5. Grab output from Command Prompt
 ___
 
 *draft-league-bot was created by Prateek Bansal and Alex Brodnicki.*
