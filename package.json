@@ -6,8 +6,8 @@
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
 		"build": "tsc",
-		"deploy-commands": "tsx src/deploy-commands.ts",
-		"start": "node ."
+		"deploy-commands": "npm run build && tsx src/deploy-commands.ts",
+		"start": "npm run build && node ."
 	},
 	"author": "Prateek Bansal and Alex Brodnicki",
 	"license": "ISC",
