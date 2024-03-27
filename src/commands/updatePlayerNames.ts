@@ -41,7 +41,6 @@ const updatePlayerNames = {
 						break;
 				}
 
-				spreadsheetId = '1uGlEtLBpvZ1bySF4sTDfJOfUeZeeg3itjvMqPps2uDg';
 				if (spreadsheetId === undefined || spreadsheetId.length === 0) {
 					throw new Error('Spreadsheet authentication has failed.');
 				}
