@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 import 'dotenv/config';
-import { google, type sheets_v4 } from 'googleapis';
+import { type sheets_v4 } from 'googleapis';
+import { getGoogleSheetsService } from 'src/helper';
 
 const updatePlayerNames = {
 	data: new SlashCommandBuilder()
@@ -26,83 +27,65 @@ const updatePlayerNames = {
 		if (!interaction.deferred && !interaction.replied) {
 			await interaction.deferReply({ ephemeral: true });
 
-			let spreadsheetId: string | undefined;
-			const division = interaction.options.get('division')?.value as string;
-			const playerNames = (interaction.options.get('player-names')?.value as string).split(',');
+			try {
+				const division = interaction.options.get('division')?.value as string;
+				const playerNames = (interaction.options.get('player-names')?.value as string).split(',');
 
-			switch (division) {
-				case 'midday':
-					spreadsheetId = process.env.GOOGLE_SPREADSHEET_MIDDAY_ID;
-					break;
-				case 'midnight':
-					spreadsheetId = process.env.GOOGLE_SPREADSHEET_MIDNIGHT_ID;
-					break;
-			}
-
-			const googleServiceAccount = process.env.GOOGLE_SERVICE_ACCOUNT;
-
-			if (spreadsheetId === undefined || spreadsheetId.length === 0 || googleServiceAccount === undefined) {
-				return await interaction.editReply({ content: 'Authentication has failed.' });
-			}
-
-			const auth = new google.auth.GoogleAuth({
-				credentials: JSON.parse(googleServiceAccount),
-				scopes: [
-					'https://www.googleapis.com/auth/drive',
-					'https://www.googleapis.com/auth/spreadsheets',
-				]
-			});
-
-			const googleSheetsService = google.sheets({
-				version: 'v4',
-				auth
-			});
-
-			const spreadsheet = await googleSheetsService.spreadsheets.get({
-				spreadsheetId,
-				fields: 'sheets.properties'
-			});
-
-			const sheets = spreadsheet.data.sheets;
-
-			if (sheets === undefined) {
-				return await interaction.editReply({ content: 'There is no available data for the spreadsheet.' });
-			}
-
-			const rostersSheet = await googleSheetsService.spreadsheets.values.get({
-				spreadsheetId,
-				range: 'Rosters'
-			});
-
-			const rostersSheetValues: string[][] | null | undefined = rostersSheet.data.values;
-
-			if (!Array.isArray(rostersSheetValues)) {
-				return await interaction.editReply({ content: 'There is no available data for the to update the roster.' });
-			}
-
-			for (const [index, name] of playerNames.entries()) {
-				try {
-					updateSheetName(sheets, googleSheetsService, spreadsheetId, index, name);
-					updateCoachName(googleSheetsService, spreadsheetId, rostersSheetValues, index, name);
-				} catch (error) {
-					let errorMessage: string;
-					error instanceof Error ? errorMessage = `An error has occurred: ${error.message}` : errorMessage = 'Unknown error.';
-
-					return await interaction.editReply({ content: errorMessage });
+				let spreadsheetId: string | undefined;
+				switch (division) {
+					case 'midday':
+						spreadsheetId = process.env.GOOGLE_SPREADSHEET_MIDDAY_ID;
+						break;
+					case 'midnight':
+						spreadsheetId = process.env.GOOGLE_SPREADSHEET_MIDNIGHT_ID;
+						break;
 				}
-			}
 
-			return await interaction.editReply({ content: 'Player names successfully updated.' });
+				spreadsheetId = '1uGlEtLBpvZ1bySF4sTDfJOfUeZeeg3itjvMqPps2uDg';
+				if (spreadsheetId === undefined || spreadsheetId.length === 0) {
+					throw new Error('Spreadsheet authentication has failed.');
+				}
+
+				const googleSheetsService = getGoogleSheetsService();
+
+				const spreadsheet = await googleSheetsService.spreadsheets.get({
+					spreadsheetId,
+					fields: 'sheets.properties'
+				});
+
+				const sheets = spreadsheet.data.sheets;
+
+				if (sheets === undefined) {
+					throw new Error('There is no available data for the spreadsheet.');
+				}
+
+				// Start on Column C for updateCoachName()
+				let startColumnIndex = 2;
+				for (const [index, name] of playerNames.entries()) {
+					updateSheetName(googleSheetsService, spreadsheetId, index, name, sheets);
+					updateCoachName(googleSheetsService, spreadsheetId, index, name, startColumnIndex);
+
+					// After the 8th iteration we need to reset back to Column C
+					(index + 1) % 8 === 0 ? startColumnIndex = 2 : startColumnIndex += 4;
+				}
+
+				return await interaction.editReply({ content: 'Player names successfully updated.' });
+			} catch (error) {
+				let errorMessage: string;
+				error instanceof Error ? errorMessage = `Error: ${error.message}` : errorMessage = 'Unknown error.';
+
+				return await interaction.editReply({ content: errorMessage });
+			}
 		}
 	}
 };
 
 const updateSheetName = (
-	sheets: sheets_v4.Schema$Sheet[],
 	googleSheetsService: sheets_v4.Sheets,
 	spreadsheetId: string,
 	outerIndex: number,
-	name: string
+	name: string,
+	sheets: sheets_v4.Schema$Sheet[]
 ): void => {
 	// Grab each player sheet, starting with P1
 	const sheet = sheets.find((element) => element.properties?.title === `P${outerIndex + 1}`);
@@ -126,28 +109,32 @@ const updateSheetName = (
 const updateCoachName = (
 	googleSheetsService: sheets_v4.Sheets,
 	spreadsheetId: string,
-	rostersSheetValues: string[][],
 	outerIndex: number,
-	name: string
+	name: string,
+	startColumnIndex: number
 ): void => {
-	for (let index = 0; index < rostersSheetValues.length; index++) {
-		// Find the position of each cell, starting with P1
-		const row = rostersSheetValues[index];
-		const columnIndex = row.indexOf(`P${outerIndex + 1}`);
-
-		if (columnIndex !== -1) {
-			void googleSheetsService.spreadsheets.values.update({
-				spreadsheetId,
-				range: `Rosters!${getColumnLetter(columnIndex)}${index + 1}`,
-				valueInputOption: 'RAW',
-				requestBody: {
-					values: [[name]]
-				}
-			});
-		}
+	// Coach names 1-8 are on row 2, 9-16 are on row 22
+	let row: string = '';
+	if (outerIndex < 8) {
+		row = '2';
+	} else if (outerIndex >= 8 && outerIndex < 16) {
+		row = '22';
 	}
+
+	// Coach names are 4 columns wide, i.e. C2:F2
+	const range = `Rosters!${getColumnLetter(startColumnIndex)}${row}:${getColumnLetter(startColumnIndex + 3)}${row}`;
+
+	void googleSheetsService.spreadsheets.values.update({
+		spreadsheetId,
+		range,
+		valueInputOption: 'RAW',
+		requestBody: {
+			values: [[name]]
+		}
+	});
 };
 
+// Converts a column index into a column letter, i.e. 0 -> A, 25 -> Z, 26 -> AA
 const getColumnLetter = (columnIndex: number): string => {
 	let columnLetter = '';
 	while (columnIndex >= 0) {
