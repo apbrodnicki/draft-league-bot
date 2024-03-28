@@ -35,6 +35,9 @@ Returns the messages and reactions in a channel based on the user's specificatio
 ### update-player-names
 Updates the sheet names and coach names in a Google spreadsheet.
 
+### add-additional-player-info
+Updates the Showdown names and timezones in a Google spreadsheet.
+
 ## Julian Clause
 1. Open Command Prompt (not as an administrator)
 2. Type `cd Pickems`, then hit enter
