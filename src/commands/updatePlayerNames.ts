@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, type CommandInteraction } from 'discord.js';
 import 'dotenv/config';
 import { type sheets_v4 } from 'googleapis';
-import { getGoogleSheetsService } from 'src/helper';
+import { getColumnLetter, getGoogleSheetsService } from 'src/helper';
 
 const updatePlayerNames = {
 	data: new SlashCommandBuilder()
@@ -131,17 +131,6 @@ const updateCoachName = (
 			values: [[name]]
 		}
 	});
-};
-
-// Converts a column index into a column letter, i.e. 0 -> A, 25 -> Z, 26 -> AA
-const getColumnLetter = (columnIndex: number): string => {
-	let columnLetter = '';
-	while (columnIndex >= 0) {
-		columnLetter = String.fromCharCode(65 + (columnIndex % 26)) + columnLetter;
-		columnIndex = Math.floor(columnIndex / 26) - 1;
-	}
-
-	return columnLetter;
 };
 
 export default updatePlayerNames;
