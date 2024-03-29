@@ -40,8 +40,9 @@ Updates the Showdown names and timezones in a Google spreadsheet.
 
 ## Julian Clause
 1. Open Command Prompt (not as an administrator)
-2. Type `cd Pickems`, then hit enter
-3. Type `npm run dev`
-4. Run a slash command in Discord
+2. Type `cd draft-league-bot`, then hit enter
+3. Type `git pull`, then hit enter
+4. Type `npm run dev`, then hit enter
+5. Run a slash command in Discord
 ___
-*draft-league-bot was created by Prateek Bansal and Alex Brodnicki.*
+*draft-league-bot was created by Alex Brodnciki and Prateek Bansal.*
