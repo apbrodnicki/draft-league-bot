@@ -5,8 +5,8 @@ import { getColumnLetter, getGoogleSheetsService } from 'src/helper';
 
 const updatePlayerNames = {
 	data: new SlashCommandBuilder()
-		.setName('update-player-names')
-		.setDescription('Update the names of the players for the start of a new season.')
+		.setName('add-additional-player-info')
+		.setDescription('Add additional player info, such as Showdown names and time zones.')
 		.addStringOption((option) =>
 			option
 				.setName('division')
@@ -19,9 +19,15 @@ const updatePlayerNames = {
 		)
 		.addStringOption((option) =>
 			option
-				.setName('player-names')
-				.setDescription('Enter in a comma separated list of player names.')
-				.setRequired(true)
+				.setName('showdown-names')
+				.setDescription('Enter in a comma separated list of showdown names.')
+				.setRequired(false)
+		)
+		.addStringOption((option) =>
+			option
+				.setName('time-zones')
+				.setDescription('Enter in a comma separated list of time zones.')
+				.setRequired(false)
 		),
 	async execute(interaction: CommandInteraction) {
 		if (!interaction.deferred && !interaction.replied) {
@@ -29,7 +35,8 @@ const updatePlayerNames = {
 
 			try {
 				const division = interaction.options.get('division')?.value as string;
-				const playerNames = (interaction.options.get('player-names')?.value as string).split(',');
+				const showdownNamesString = interaction.options.get('showdown-names')?.value as string;
+				const timezonesString = interaction.options.get('time-zones')?.value as string;
 
 				let spreadsheetId: string | undefined;
 				switch (division) {
@@ -45,30 +52,32 @@ const updatePlayerNames = {
 					throw new Error('Spreadsheet authentication has failed.');
 				}
 
-				const googleSheetsService = getGoogleSheetsService();
-
-				const spreadsheet = await googleSheetsService.spreadsheets.get({
-					spreadsheetId,
-					fields: 'sheets.properties'
-				});
-
-				const sheets = spreadsheet.data.sheets;
-
-				if (sheets === undefined) {
-					throw new Error('There is no available data for the spreadsheet.');
+				let showdownNames: string[] = [];
+				if (showdownNamesString !== undefined) {
+					showdownNames = showdownNamesString.split(',');
 				}
 
-				// Start on Column C for updateCoachName()
+				let timezones: string[] = [];
+				if (timezonesString !== undefined) {
+					timezones = timezonesString.split(',');
+				}
+
+				const googleSheetsService = getGoogleSheetsService();
+
+				for (const [index, name] of showdownNames.entries()) {
+					updateShowdownName(googleSheetsService, spreadsheetId, index, name);
+				}
+
+				// Start on Column C
 				let startColumnIndex = 2;
-				for (const [index, name] of playerNames.entries()) {
-					updateSheetName(googleSheetsService, spreadsheetId, index, name, sheets);
-					updateCoachName(googleSheetsService, spreadsheetId, index, name, startColumnIndex);
+				for (const [index, timezone] of timezones.entries()) {
+					updateTimezone(googleSheetsService, spreadsheetId, index, timezone, startColumnIndex);
 
 					// After the 8th iteration we need to reset back to Column C
 					(index + 1) % 8 === 0 ? startColumnIndex = 2 : startColumnIndex += 4;
 				}
 
-				return await interaction.editReply({ content: 'Player names successfully updated.' });
+				return await interaction.editReply({ content: 'Player info successfully updated.' });
 			} catch (error) {
 				let errorMessage: string;
 				error instanceof Error ? errorMessage = `Error: ${error.message}` : errorMessage = 'Unknown error.';
@@ -79,48 +88,38 @@ const updatePlayerNames = {
 	}
 };
 
-const updateSheetName = (
+const updateShowdownName = (
 	googleSheetsService: sheets_v4.Sheets,
 	spreadsheetId: string,
 	outerIndex: number,
-	name: string,
-	sheets: sheets_v4.Schema$Sheet[]
+	name: string
 ): void => {
-	// Grab each player sheet, starting with P1
-	const sheet = sheets.find((currentSheet) => currentSheet.properties?.title === `P${outerIndex + 1}`);
-
-	void googleSheetsService.spreadsheets.batchUpdate({
+	void googleSheetsService.spreadsheets.values.update({
 		spreadsheetId,
+		range: `Standings Code!J${42 + outerIndex}`,
+		valueInputOption: 'RAW',
 		requestBody: {
-			requests: [{
-				updateSheetProperties: {
-					fields: 'title',
-					properties: {
-						title: name,
-						sheetId: sheet?.properties?.sheetId
-					}
-				}
-			}]
+			values: [[name]]
 		}
 	});
 };
 
-const updateCoachName = (
+const updateTimezone = (
 	googleSheetsService: sheets_v4.Sheets,
 	spreadsheetId: string,
 	outerIndex: number,
-	name: string,
+	timezone: string,
 	startColumnIndex: number
 ): void => {
-	// Coach names 1-8 are on row 2, 9-16 are on row 22
+	// Timezones 1-8 are on row 4, 9-16 are on row 24
 	let row: string = '';
 	if (outerIndex < 8) {
-		row = '2';
+		row = '4';
 	} else if (outerIndex >= 8 && outerIndex < 16) {
-		row = '22';
+		row = '24';
 	}
 
-	// Coach names are 4 columns wide, i.e. C2:F2
+	// Timezones are 4 columns wide, i.e. C4:F4
 	const range = `Rosters!${getColumnLetter(startColumnIndex)}${row}:${getColumnLetter(startColumnIndex + 3)}${row}`;
 
 	void googleSheetsService.spreadsheets.values.update({
@@ -128,7 +127,7 @@ const updateCoachName = (
 		range,
 		valueInputOption: 'RAW',
 		requestBody: {
-			values: [[name]]
+			values: [[timezone]]
 		}
 	});
 };
