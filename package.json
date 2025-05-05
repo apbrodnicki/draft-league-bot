@@ -9,7 +9,7 @@
 		"deploy-commands": "npm run build && tsx src/deploy-commands.ts",
 		"start": "npm run build && node ."
 	},
-	"author": "Prateek Bansal and Alex Brodnicki",
+	"author": "Alex Brodnicki and Prateek Bansal",
 	"license": "ISC",
 	"dependencies": {
 		"discord.js": "^14.14.1",
